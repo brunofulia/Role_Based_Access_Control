@@ -1,0 +1,63 @@
+name: Security & Access Control Regression Gate
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      simulate_incident:
+        description: 'Simulate a Security Incident (Data Breach)'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  authorization-matrix:
+    name: Execute Data-Driven Security Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      - name: Install Framework Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Install OS Dependencies for Playwright
+        run: npx playwright install-deps
+          
+      - name: Initialize Headless Browsers
+        run: |
+          rfbrowser init
+          
+      - name: Execute Security Gate Tests
+        run: |
+          echo "Starting Role-Based Access Control validation matrix..."
+          
+          SIMULATION_FLAG=""
+          if [ "${{ github.event.inputs.simulate_incident }}" = "true" ]; then
+            echo "WARNING: Running in SIMULATION MODE to test Security Gate."
+            SIMULATION_FLAG="-v SIMULATE_SECURITY_INCIDENT:True"
+          fi
+          
+          robot -d results $SIMULATION_FLAG tests/
+          
+      - name: Publish Test Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit-report
+          path: results/
+          retention-days: 14

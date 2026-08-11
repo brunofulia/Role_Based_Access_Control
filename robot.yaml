@@ -1,0 +1,8 @@
+# robot.yaml configures the Robot Framework execution environment
+tasks:
+  Security Regression:
+    - robot -d results tests/
+
+environment:
+  PYTHONPATH:
+    - .

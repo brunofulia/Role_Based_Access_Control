@@ -1,0 +1,6 @@
+*** Test Cases ***;${role};${resource};${action};${expected_status};${layer};${security_rule}
+Employee Salary API;employee;salary_info;read;403;api;deny
+Employee Personal Details API;employee;personal_details;read;200;api;allow
+Employee Admin Panel UI;employee;admin_panel;view;403;ui;deny
+Admin Salary API;admin;salary_info;read;200;api;allow
+Admin Panel UI;admin;admin_panel;view;200;ui;allow
